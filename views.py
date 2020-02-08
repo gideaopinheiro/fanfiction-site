@@ -124,18 +124,8 @@ class InitView(View):
 class LoggedView(View):
 
     def prompt(self):
-        print(f"\nOlá, {self.state.username}!")
-        print(f"E-mail: {self.state.user_data['email']}\n\n")
-
-        print("1 - Criar história")
-        print("2 - Listar minhas histórias")
-        print("3 - Favoritos")
-        print("4 - Pesquisar histórias")
-        print("5 - Alterar perfil")
-        print("6 - Logout")
-
-        if self.state.username in self.state.admin_list:
-            print("7 - Painel de administrador")
+        self.displayWelcomeMessage(self.state.username, self.state.user_data['email'])
+        self.displayMenu(self.state.username)
 
         option = input('\n\n')
         return option
@@ -164,6 +154,7 @@ class LoggedView(View):
         else:
             print('Opção inválida')
 
+
     def update_profile(self):
         print('\n\nAlterando dados pessoais\n\n')
         email = input('Novo e-mail: ')
@@ -176,6 +167,7 @@ class LoggedView(View):
             json.dump(self.state.user_data, file)
 
         self.state.user_data = self.state.user_data
+
 
     def list_my_stories(self):
 
@@ -228,6 +220,24 @@ class LoggedView(View):
         with open(self.state.user_json_path, 'w') as file:
             json.dump(self.state.user_data, file)
 
+    def isAdmin(self, credential):
+        if credential in self.state.admin_list:
+            return True
+        return False
+
+    def displayWelcomeMessage(self, userName, userEmail):
+        print(f"\nOlá, {userName}!")
+        print(f"E-mail: {userEmail}\n\n")
+    
+    def displayMenu(self, credential):
+        print("1 - Criar história")
+        print("2 - Listar minhas histórias")
+        print("3 - Favoritos")
+        print("4 - Pesquisar histórias")
+        print("5 - Alterar perfil")
+        print("6 - Logout")
+        if self.isAdmin(credential):
+            print("7 - Painel de administrador")
 
 class WorkingStoryView(View):
     story_data: dict
@@ -624,6 +634,7 @@ class AdminControlPanelView(View):
 
         option = input('Digite sua opção')
         return option
+
 
     def run(self, option: str):
         if option == '1':
