@@ -2,7 +2,8 @@ import os
 import json
 import shutil
 import subprocess
-
+from UserRepository import UserRepository
+from exceptions import *
 
 class View:
 
@@ -91,40 +92,17 @@ class InitView(View):
         email = input("Digite um endereço de e-mail: ")
         password = input("Digite uma senha: ")
 
-        with open(self.state.users_json_path, 'r') as file:
-            users_data = json.load(file)
+        try:
+            UserRepository.saveUser(username, email, password, self.state)
+        except UserAlreadyExistError:
+            print("Usuário já existe!")
 
-        if not username in users_data['users']:
-
-            users_data['users'].append(username)
-
-            with open(self.state.users_json_path, 'w') as file:
-                json.dump(users_data, file)
-
-            user_path = os.path.join(self.state.users_data_path, username)
-
-            if os.path.isdir(user_path):
-                shutil.rmtree(user_path)
-
-            os.mkdir(user_path)
-
-            user_index = len(users_data['users']) - 1
-            user_data = {'index': user_index, 'email': email, 'pass': password, 'stories': [], 'fav_authors': [],
-                         'fav_stories': []}
-
-            user_json_path = os.path.join(user_path, 'user_data.json')
-
-            with open(user_json_path, 'w') as file:
-                json.dump(user_data, file)
-
-        else:
-            print('Usuário já existe!\n')
 
 
 class LoggedView(View):
 
     def prompt(self):
-        self.displayWelcomeMessage(self.state.username, self.state.user_data['email'])
+        self.displayWellcomeMessage(self.state.username, self.state.user_data['email'])
         self.displayMenu(self.state.username)
 
         option = input('\n\n')
@@ -225,7 +203,7 @@ class LoggedView(View):
             return True
         return False
 
-    def displayWelcomeMessage(self, userName, userEmail):
+    def displayWellcomeMessage(self, userName, userEmail):
         print(f"\nOlá, {userName}!")
         print(f"E-mail: {userEmail}\n\n")
     
